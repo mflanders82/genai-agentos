@@ -1,6 +1,6 @@
 # 🐍 GenAI Agents Infrastructure
 
-This repository provides the complete infrastructure for running GenAI agents, including:
+This forked repository provides the complete infrastructure for running GenAI agents, including:
 
 * Backend
 * Router
