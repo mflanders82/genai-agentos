@@ -11,7 +11,40 @@ This repository provides the complete infrastructure for running GenAI agents, i
 * Redis
 * Celery
 
-## 📎 Repository Link
+## ### 7. Register with GenAI AgentOS
+1. Go to the Frontend UI at [http://localhost:3000/](http://localhost:3000/)
+2. Navigate to MCP Servers section
+3. Add new MCP server with URL: `http://host.docker.internal:8081`
+
+**Note:** When running in Docker, use `http://host.docker.internal:8081` instead of `http://localhost:8081` to allow the GenAI backend to access your local MCP server.
+
+### Alternative: Docker Setup (Recommended)
+
+The MCP Google-Notion server is included in the main docker-compose setup:
+
+```bash
+# Configure environment variables in .env file
+cp .env-example .env
+
+# Add your Google and Notion credentials to .env:
+# GOOGLE_ENABLED=true
+# NOTION_ENABLED=true
+# NOTION_API_TOKEN=secret_your-notion-integration-token
+
+# Place your google_client_config.json in mcp-google-notion-server/ directory
+
+# Start all services including MCP server
+make up
+# or
+docker compose up
+```
+
+The MCP server will be available at:
+- **Service URL:** `http://genai-mcp-google-notion:8081` (internal Docker network)
+- **External URL:** `http://localhost:8081` (from host machine)
+- **GenAI AgentOS URL:** `http://genai-mcp-google-notion:8081` (use this in the UI)
+
+## 💎 Environment Variablesitory Link
 
 👉 [GitHub Repository](https://github.com/genai-works-org/genai-agentos)
 
@@ -34,8 +67,29 @@ The system supports multiple kinds of Agents:
 | Agent Type       | Description                                                                                   |
 |------------------|-----------------------------------------------------------------------------------------------|
 | **GenAI Agents** | Connected via [`genai-protocol`](https://pypi.org/project/genai-protocol/) library interface. |
-| **MCP Servers**  | MCP (Model Context Protocol) servers can be added by pasting their URL in the UI.             |
+| **MCP Servers**  | MCP (Model Context Protocol) servers can be added by pasting their URL in the UI. Supports Google APIs and Notion integration via the included `mcp-google-notion-server`. |
 | **A2A Servers**  | A2A (Agent to Agent Protocol) servers can be added by pasting their URL in the UI.            |
+
+### 🔌 Built-in MCP Google-Notion Server
+
+The system includes a robust MCP server (`mcp-google-notion-server/`) that provides:
+
+**Google API Integration:**
+- Gmail: Read, send, and search emails
+- Google Calendar: Manage events and schedules
+- Google Drive: Access and manage files
+- Google Sheets: Read and write spreadsheet data
+
+**Notion Integration:**
+- Database operations and page management
+- Search across Notion workspace
+- Block-level content management
+
+**Features:**
+- HTTP transport support for GenAI AgentOS integration
+- Comprehensive error handling and logging
+- Performance monitoring with Prometheus metrics
+- Connection pooling and retry mechanisms
 
 ---
 
@@ -137,7 +191,74 @@ uv run python <agent_name>.py # or alternatively
 python <agent_name>.py 
 ```
 
-## 💎 Environment Variables
+## � MCP Google-Notion Server Setup
+
+The included MCP Google-Notion server provides integration with Google APIs and Notion. Follow these steps to set it up:
+
+### 1. Navigate to MCP Server Directory
+```bash
+cd mcp-google-notion-server/
+```
+
+### 2. Install Dependencies
+```bash
+# Using uv (recommended)
+uv sync
+
+# Or using pip
+pip install -e .
+```
+
+### 3. Configure Environment Variables
+Create a `.env` file in the `mcp-google-notion-server/` directory:
+
+```bash
+# Google API Configuration
+GOOGLE_ENABLED=true
+GOOGLE_CLIENT_CONFIG_FILE=google_client_config.json
+GOOGLE_TOKEN_FILE=google_token.json
+
+# Notion Configuration  
+NOTION_ENABLED=true
+NOTION_API_TOKEN=secret_your-notion-integration-token
+
+# Transport Configuration for GenAI AgentOS
+TRANSPORT_TYPE=http
+TRANSPORT_PORT=8081
+TRANSPORT_HOST=0.0.0.0
+
+# Logging
+DEBUG=true
+LOG_LEVEL=info
+```
+
+### 4. Setup Google API Credentials
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable required APIs (Gmail, Calendar, Drive, Sheets)
+4. Create OAuth 2.0 credentials
+5. Download the credentials JSON file as `google_client_config.json`
+
+### 5. Setup Notion Integration
+1. Go to [Notion Integrations](https://www.notion.so/my-integrations)
+2. Create a new integration
+3. Copy the integration token to your `.env` file
+4. Share your Notion pages/databases with the integration
+
+### 6. Run the MCP Server
+```bash
+# Start the server with HTTP transport for GenAI AgentOS
+python main.py --transport http --port 8081
+```
+
+### 7. Register with GenAI AgentOS
+1. Go to the Frontend UI at [http://localhost:3000/](http://localhost:3000/)
+2. Navigate to MCP Servers section
+3. Add new MCP server with URL: `http://host.docker.internal:8081`
+
+**Note:** When running in Docker, use `http://host.docker.internal:8081` instead of `http://localhost:8081` to allow the GenAI backend to access your local MCP server.
+
+## �💎 Environment Variables
 
 | Variable                    | Description                                                          | Example / Default                                                                       |
 |-----------------------------|----------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
@@ -156,6 +277,21 @@ python <agent_name>.py
 | `DEFAULT_FILES_FOLDER_NAME` | Default folder for file storage - Docker file volume path            | `/files`                                                                                |
 | `CLI_BACKEND_ORIGIN_URL`    | `backend` URL for CLI access                                         | `http://localhost:8000`                                                                 |
 
+### MCP Google-Notion Server Variables
+
+| Variable                    | Description                                                          | Example / Default                                                                       |
+|-----------------------------|----------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| `GOOGLE_ENABLED`            | Enable Google API integration                                        | `true` / `false`                                                                        |
+| `GOOGLE_CLIENT_CONFIG_FILE` | Path to Google OAuth client configuration JSON                      | `google_client_config.json`                                                            |
+| `GOOGLE_TOKEN_FILE`         | Path to store Google OAuth tokens                                    | `google_token.json`                                                                     |
+| `NOTION_ENABLED`            | Enable Notion integration                                            | `true` / `false`                                                                        |
+| `NOTION_API_TOKEN`          | Notion integration API token                                         | `secret_your-notion-integration-token`                                                  |
+| `TRANSPORT_TYPE`            | MCP transport protocol type                                          | `http` / `stdio` / `websocket`                                                          |
+| `TRANSPORT_PORT`            | Port for HTTP transport (for GenAI AgentOS integration)             | `8081`                                                                                  |
+| `TRANSPORT_HOST`            | Host binding for HTTP transport                                      | `0.0.0.0` / `localhost`                                                                 |
+| `METRICS_ENABLED`           | Enable Prometheus metrics                                            | `true` / `false`                                                                        |
+| `METRICS_PORT`              | Port for metrics endpoint                                            | `8082`                                                                                  |
+
 ## 🛠️ Troubleshooting
 
 ### ❓ MCP server or A2A card URL could not be accessed by the genai-backend
@@ -169,3 +305,36 @@ python <agent_name>.py
 ✅ Make sure your MCP server supports `streamable-http` protocol and is remotely accessible.Also make sure that you're specifiying full URL of your server, like - `http://host.docker.internal:8000/mcp`
 
 ⚠️ Side note: `sse` protocol is officially deprecated by MCP protocol devs, `stdio` protocol is not supported yet, but stay tuned for future announcements!
+
+### ❓ Google-Notion MCP Server connection issues
+✅ Make sure the MCP server is running with HTTP transport:
+```bash
+cd mcp-google-notion-server/
+python main.py --transport http --port 8081
+```
+
+✅ Use `http://host.docker.internal:8081` as the MCP server URL in the GenAI AgentOS UI (not `localhost`)
+
+✅ Verify your Google API credentials are properly configured in `google_client_config.json`
+
+✅ Ensure your Notion integration token is valid and the integration has access to your workspace
+
+✅ Check the MCP server logs for authentication or API errors
+
+### ❓ Google API authentication fails
+✅ Verify your Google Cloud Console project has the required APIs enabled:
+- Gmail API
+- Google Calendar API  
+- Google Drive API
+- Google Sheets API
+
+✅ Make sure your OAuth 2.0 credentials are configured for the correct application type
+
+✅ Check that the `google_client_config.json` file path is correct and the file is readable
+
+### ❓ Notion integration not working
+✅ Verify your Notion integration token starts with `secret_` 
+
+✅ Make sure you've shared the relevant Notion pages/databases with your integration
+
+✅ Check that the integration has the required permissions (read/write content, read/write pages)

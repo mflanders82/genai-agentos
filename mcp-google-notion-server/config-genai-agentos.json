@@ -1,0 +1,39 @@
+{
+    "server_name": "Google-Notion MCP Server",
+    "server_version": "0.1.0",
+    "debug": true,
+    "log_level": "info",
+    "tool_timeout": 30.0,
+    "max_concurrent_tools": 10,
+    "metrics_enabled": true,
+    "metrics_port": 8082,
+    "transport": {
+        "type": "http",
+        "uri": null,
+        "port": 8081,
+        "host": "0.0.0.0",
+        "connect_timeout": 10.0,
+        "read_timeout": 30.0,
+        "write_timeout": 10.0,
+        "max_connections": 100,
+        "max_keepalive": 20,
+        "poll_interval": 1.0
+    },
+    "google": {
+        "enabled": true,
+        "client_config": null,
+        "token_file": "google_token.json",
+        "credentials": null,
+        "scopes": [
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/drive",
+            "https://www.googleapis.com/auth/gmail.modify",
+            "https://www.googleapis.com/auth/spreadsheets"
+        ]
+    },
+    "notion": {
+        "enabled": true,
+        "api_token": null,
+        "timeout_ms": 30000
+    }
+}

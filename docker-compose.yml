@@ -121,6 +121,31 @@ services:
     depends_on:
       - redis
 
+  mcp-google-notion:
+    container_name: genai-mcp-google-notion
+    build:
+      context: ./mcp-google-notion-server
+    ports:
+      - "8081:8081"
+      - "8082:8082"  # metrics port
+    env_file: .env
+    environment:
+      - TRANSPORT_TYPE=http
+      - TRANSPORT_PORT=8081
+      - TRANSPORT_HOST=0.0.0.0
+      - METRICS_ENABLED=true
+      - METRICS_PORT=8082
+      - DEBUG=true
+      - LOG_LEVEL=info
+    networks:
+     - local-genai-network
+    restart: unless-stopped
+    volumes:
+      # Mount credentials files from host
+      - ./mcp-google-notion-server/google_client_config.json:/app/google_client_config.json:ro
+      - ./mcp-google-notion-server/google_token.json:/app/google_token.json
+      - shared-files-volume:/app/files
+
 volumes:
   postgres-volume:
   shared-files-volume:

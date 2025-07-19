@@ -1,0 +1,49 @@
+[project]
+name = "mcp-google-notion-server"
+version = "0.1.0"
+description = "MCP server with Google and Notion integration"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli]>=1.9.0",
+    "google-api-python-client>=2.147.0",
+    "google-auth>=2.34.0",
+    "google-auth-oauthlib>=1.2.1",
+    "notion-client>=2.2.1",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.8.0",
+    "structlog>=24.4.0",
+    "tenacity>=9.1.0",
+    "aiofiles>=24.1.0",
+    "httpx>=0.28.0",
+    "prometheus-client>=0.21.0",
+    "websockets>=15.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.26.0",
+    "pytest-mock>=3.14.0",
+    "black>=24.10.0",
+    "ruff>=0.11.0",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "PIE", "T20"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
